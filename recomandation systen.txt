@@ -1,0 +1,44 @@
+class ContentBasedRecommendationSystem:
+    def _init_(self, data):
+        self.data = data
+    
+    def recommend_movies(self, user_id, num_recommendations=5):
+        """
+        Recommend movies to the user based on their liked genres.
+        """
+        user_liked_genres = self.get_user_liked_genres(user_id)
+        recommended_movies = {}
+        for movie, attributes in self.data.items():
+            movie_genres = attributes['genres']
+            common_genres = set(user_liked_genres).intersection(movie_genres)
+            if len(common_genres) > 0:
+                recommended_movies[movie] = len(common_genres)
+        return sorted(recommended_movies.items(), key=lambda x: x[1], reverse=True)[:num_recommendations]
+    
+    def get_user_liked_genres(self, user_id):
+        """
+        Get the genres liked by the user based on their past preferences.
+        """
+        liked_genres = []
+        for movie, rating in self.data[user_id].items():
+            if rating >= 4:  # Assuming ratings above or equal to 4 indicate liking
+                liked_genres.extend(self.data[movie]['genres'])
+        return liked_genres
+
+data = {
+    'User1': {'Movie1': 5, 'Movie2': 4, 'Movie3': 3},
+    'User2': {'Movie1': 4, 'Movie2': 5, 'Movie4': 4},
+    'User3': {'Movie2': 3, 'Movie3': 4, 'Movie4': 5}
+}
+
+movies_attributes = {
+    'Movie1': {'genres': ['Action', 'Adventure']},
+    'Movie2': {'genres': ['Drama', 'Romance']},
+    'Movie3': {'genres': ['Comedy', 'Romance']},
+    'Movie4': {'genres': ['Action', 'Drama']}
+}
+
+recommendation_system = ContentBasedRecommendationSystem(movies_attributes)
+user_id = 'User1'
+recommendations = recommendation_system.recommend_movies(user_id)
+print("Recommendations for", user_id, ":", recommendations)
